@@ -58,13 +58,16 @@ const store = createStore({
             localStorage.setItem('products', JSON.stringify(state.products));
         },
         signUp(_, payload) {
+            if (!payload.mail || !payload.password || !payload.truePassword) {
+                return { success: false, error: 'empty_fields' };
+            }
             if (payload.password === payload.truePassword){
                 delete payload.truePassword;
                 localStorage.setItem(`${payload.mail}`, JSON.stringify(payload));
-                alert('Успешно, Выполните вход!');
+                return { success: true };
             }
             else {
-                alert('Неверные данные!')
+                return { success: false, error: 'password_mismatch' };
             }
         },
         signIn(_, payload) {
@@ -73,8 +76,9 @@ const store = createStore({
 
             // Если пользователя нет
             if (!stored) {
-                alert('Пользователь не найден!');
-                return;
+                // alert('Пользователь не найден!');
+                // return;
+                return { success: false, error: 'user_not_found' };
             }
 
             try {
@@ -84,11 +88,14 @@ const store = createStore({
                 if (payload.password === person.password) {
                     sessionStorage.setItem('auth', JSON.stringify('+'));
                     window.location.reload();
+                    return { success: true };
                 } else {
-                    alert('Неверный пароль!');
+                    // alert('Неверный пароль!');
+                    return { success: false, error: 'invalid_password' };
                 }
             } catch (e) {
-                alert('Ошибка данных пользователя');
+                // alert('Ошибка данных пользователя');
+                return { success: false, error: 'data_error' };
             }
         }
     },

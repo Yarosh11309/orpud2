@@ -5,10 +5,18 @@
       <p>Вы авторизованы!</p>
       <button @click="$store.dispatch('stateAuth')" id="btn-exit">Выйти</button>
     </div>
-    <Login v-if="!isSignUp && !isAuthenticated"/>
-    <Signup v-else-if="isSignUp && !isAuthenticated"/>
-    <div v-if="!isSignUp && !isAuthenticated" @click="setActiveBlock" class="btn-switch">Зарегаться?</div>
-    <div v-else-if="isSignUp && !isAuthenticated" @click="setActiveBlock" class="btn-switch">Войти?</div>
+
+    <!-- Container for Login form and its switch link -->
+    <div v-if="!isSignUp && !isAuthenticated" class="form-container">
+      <Login/>
+      <div @click="setActiveBlock" class="btn-switch">Ещё нет аккаунта? Зарегистрироваться</div>
+    </div>
+
+    <!-- Container for Signup form and its switch link -->
+    <div v-else-if="isSignUp && !isAuthenticated" class="form-container">
+      <Signup @registration-successful="switchToLogin"/>
+      <div @click="setActiveBlock" class="btn-switch">Уже есть аккаунт? Войти</div>
+    </div>
   </div>
 </template>
 
@@ -31,6 +39,9 @@ export default {
   methods: {
     setActiveBlock() {
       this.isSignUp = !this.isSignUp;
+    },
+    switchToLogin() {
+      this.isSignUp = false;
     }
   }
 }
@@ -46,7 +57,15 @@ h2 {
 
 .content {
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Changed from flex to column for centering forms */
+  align-items: center; /* Center items horizontally */
+  /* justify-content: center; */ /* This might not be needed if align-items works well */
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center form and switch link within this container */
 }
 
 #authenticated {
@@ -72,11 +91,16 @@ h2 {
 }
 
 .btn-switch {
-  position: absolute;
+  /* position: absolute; */ /* Removed */
+  margin-top: 15px; /* Add some space above the switch link */
+  font-size: 16px; /* Example font size */
+  color: #007bff; /* Example link color */
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .btn-switch:hover {
-  cursor: pointer;
-  color: blue;
+  text-decoration: underline;
+  color: #0056b3; /* Darker blue on hover */
 }
 </style>

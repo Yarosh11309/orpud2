@@ -14,6 +14,7 @@
                 <label for="input-true-password">Подтвердить пароль*</label>
                 <input v-model="person.truePassword" type="password" id="input-true-password" placeholder="..." required>
             </div>
+            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
             <button @click="signUp" id="btn">Зарегистрироваться</button>
         </form>
     </div>
@@ -27,19 +28,32 @@ export default {
             mail: '',
             password: null,
             truePassword: null
-        }
+        },
+        errorMessage: null
     }
   },
   methods: {
-    async signUp() { 
-        if(this.person.password && this.person.truePassword){
-            await this.$store.dispatch('signUp', this.person);
-            this.person.mail = '';
-            this.person.password = null;
-            this.person.truePassword = null;
-        }
-        else{
-            alert("Заполните поля!");
+    async signUp() {
+        if (this.person.mail && this.person.password && this.person.truePassword) {
+            const result = await this.$store.dispatch('signUp', this.person);
+            if (result.success) {
+                this.$emit('registration-successful');
+                this.person.mail = '';
+                this.person.password = null;
+                this.person.truePassword = null;
+                this.errorMessage = null;
+            } else {
+                if (result.error === 'password_mismatch') {
+                    this.errorMessage = 'Пароли не совпадают';
+                } else if (result.error === 'empty_fields') {
+                    this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
+                }
+                else {
+                    this.errorMessage = 'Произошла ошибка регистрации.';
+                }
+            }
+        } else {
+            this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
         }
     }
   }
@@ -47,6 +61,12 @@ export default {
 </script>
   
 <style scoped>
+.error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 #login {
   margin-block: 40px;
   padding: 40px;

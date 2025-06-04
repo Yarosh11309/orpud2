@@ -10,7 +10,8 @@
                 <label for="input-password">Пароль*</label>
                 <input v-model="person.password" type="password" id="input-password" placeholder="..." required>
             </div>
-            <button @click="$store.dispatch('signIn', person)" id="btn">Войти</button>
+            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+            <button @click="handleSignIn" id="btn">Войти</button>
         </form>
     </div>
 </template>
@@ -22,6 +23,33 @@ export default {
         person: {
             mail: '',
             password: null
+        },
+        errorMessage: null
+    }
+  },
+  methods: {
+    async handleSignIn() {
+        if (!this.person.mail || !this.person.password) {
+            this.errorMessage = 'Пожалуйста, заполните все поля.';
+            return;
+        }
+        this.errorMessage = null; // Clear previous error
+
+        const result = await this.$store.dispatch('signIn', this.person);
+
+        if (result && !result.success) {
+            if (result.error === 'user_not_found') {
+                this.errorMessage = 'Пользователь с таким email не найден.';
+            } else if (result.error === 'invalid_password') {
+                this.errorMessage = 'Неверный пароль.';
+            } else if (result.error === 'data_error') {
+                this.errorMessage = 'Произошла ошибка при чтении данных пользователя.';
+            } else {
+                this.errorMessage = 'Произошла ошибка входа. Попробуйте снова.';
+            }
+        } else if (result && result.success) {
+            // Page reloads due to store logic, clear error just in case
+            this.errorMessage = null;
         }
     }
   }
@@ -29,6 +57,12 @@ export default {
 </script>
   
 <style scoped>
+.error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px; /* Or margin-top, depending on placement */
+}
+
 #login {
   margin-block: 40px;
   padding: 40px;
