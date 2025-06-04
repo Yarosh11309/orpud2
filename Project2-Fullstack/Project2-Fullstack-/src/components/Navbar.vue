@@ -20,11 +20,25 @@
 
 <script>
 export default {
-
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.auth && this.$store.state.auth.isAuthenticated;
+    },
+    userName() {
+      return this.$store.state.auth && this.$store.state.auth.userName ? this.$store.state.auth.userName : '';
+    }
+  }
 }
 </script>
 
 <style scoped>
+.user-greeting {
+  color: #fff; /* White text color for greeting */
+  margin-right: 15px; /* Space it out a bit from other nav items */
+  font-weight: 600;
+  font-size: 14px;
+}
+
 nav {
     width: 100%;
     height: 70px;

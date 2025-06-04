@@ -33,7 +33,8 @@ export default {
   },
   computed: {
     isAuthenticated() {
-      return this.$store.state.auth === '+';
+      // return this.$store.state.auth === '+'; // Old way
+      return this.$store.state.auth && this.$store.state.auth.isAuthenticated; // New way
     }
   }, 
   methods: {
@@ -41,6 +42,7 @@ export default {
       this.isSignUp = !this.isSignUp;
     },
     switchToLogin() {
+      console.log('Account.vue: switchToLogin method triggered.'); // Debug log
       this.isSignUp = false;
     }
   }

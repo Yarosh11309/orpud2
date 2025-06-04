@@ -3,6 +3,10 @@
         <h3>Регистрация</h3>
         <form @submit.prevent id="form">
             <div>
+                <label for="input-name">Ваше имя*</label>
+                <input v-model="person.name" type="text" id="input-name" placeholder="Иван" required>
+            </div>
+            <div>
                 <label for="input-email">Email*</label>
                 <input v-model="person.mail" type="email" id="input-email" placeholder="example@mail.ru" required>
             </div>
@@ -25,6 +29,7 @@ export default {
   data() {
     return {
         person: {
+            name: '', // New field
             mail: '',
             password: null,
             truePassword: null
@@ -34,18 +39,23 @@ export default {
   },
   methods: {
     async signUp() {
-        if (this.person.mail && this.person.password && this.person.truePassword) {
+        // Ensure name is also included in the check for filled fields
+        if (this.person.name && this.person.mail && this.person.password && this.person.truePassword) {
             const result = await this.$store.dispatch('signUp', this.person);
-            if (result.success) {
+            console.log('Signup.vue: Result from store dispatch:', result); // Debug log
+            if (result && result.success) { // Added check for result object itself
+                console.log('Signup.vue: Registration successful, emitting event.'); // Debug log
                 this.$emit('registration-successful');
+                this.person.name = ''; // Clear the name field
                 this.person.mail = '';
                 this.person.password = null;
                 this.person.truePassword = null;
                 this.errorMessage = null;
             } else {
-                if (result.error === 'password_mismatch') {
+                console.log('Signup.vue: Registration failed or result was unexpected.'); // Debug log
+                if (result && result.error === 'password_mismatch') { // Added check for result object
                     this.errorMessage = 'Пароли не совпадают';
-                } else if (result.error === 'empty_fields') {
+                } else if (result && result.error === 'empty_fields') { // Added check for result object
                     this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
                 }
                 else {
@@ -53,7 +63,8 @@ export default {
                 }
             }
         } else {
-            this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
+            // Updated error message to reflect that all fields are required.
+            this.errorMessage = 'Пожалуйста, заполните все обязательные поля, включая имя.';
         }
     }
   }

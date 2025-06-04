@@ -5,7 +5,8 @@ const store = createStore({
         const products = JSON.parse(localStorage.getItem('products'));
         return {
             products: products || [],
-            auth: JSON.parse(sessionStorage.getItem('auth')) || '-'
+            // auth: JSON.parse(sessionStorage.getItem('auth')) || '-'
+            auth: JSON.parse(sessionStorage.getItem('auth')) || { isAuthenticated: false, userName: null }
         }
     },
     getters: {
@@ -19,8 +20,11 @@ const store = createStore({
             localStorage.setItem('products', JSON.stringify(state.products));
         },
         stateAuth(state) {
-            state.auth = state.auth === '+' ? '-' : '+';
-            sessionStorage.setItem('auth', JSON.stringify(state.auth));
+            // state.auth = state.auth === '+' ? '-' : '+';
+            // sessionStorage.setItem('auth', JSON.stringify(state.auth));
+            const authData = { isAuthenticated: false, userName: null };
+            state.auth = authData; // Update Vuex state
+            sessionStorage.setItem('auth', JSON.stringify(authData)); // Update sessionStorage
             window.location.reload();
         },
         addProduct(state, payload) {
@@ -58,15 +62,22 @@ const store = createStore({
             localStorage.setItem('products', JSON.stringify(state.products));
         },
         signUp(_, payload) {
-            if (!payload.mail || !payload.password || !payload.truePassword) {
+            // Check for all required fields, including name
+            if (!payload.name || !payload.mail || !payload.password || !payload.truePassword) {
                 return { success: false, error: 'empty_fields' };
             }
-            if (payload.password === payload.truePassword){
-                delete payload.truePassword;
-                localStorage.setItem(`${payload.mail}`, JSON.stringify(payload));
+
+            if (payload.password === payload.truePassword) {
+                // Construct user object to save, excluding truePassword
+                const userToSave = {
+                    name: payload.name,
+                    mail: payload.mail,
+                    password: payload.password
+                };
+                localStorage.setItem(`${payload.mail}`, JSON.stringify(userToSave));
+                // console.log('User data saved:', userToSave); // For debugging
                 return { success: true };
-            }
-            else {
+            } else {
                 return { success: false, error: 'password_mismatch' };
             }
         },
@@ -86,7 +97,10 @@ const store = createStore({
 
                 // Сравниваем только пароль
                 if (payload.password === person.password) {
-                    sessionStorage.setItem('auth', JSON.stringify('+'));
+                    // sessionStorage.setItem('auth', JSON.stringify('+'));
+                    const authData = { isAuthenticated: true, userName: person.name };
+                    state.auth = authData; // Update Vuex state
+                    sessionStorage.setItem('auth', JSON.stringify(authData)); // Update sessionStorage
                     window.location.reload();
                     return { success: true };
                 } else {
@@ -120,7 +134,8 @@ const store = createStore({
             commit('changeCountInCart', payload);
         },
         signUp({ commit }, payload) {
-            commit('signUp', payload);
+            // commit('signUp', payload);
+            return commit('signUp', payload);
         },
         signIn({ commit }, payload) {
             commit('signIn', payload);
